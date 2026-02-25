@@ -1,0 +1,5 @@
+# Ignore environment variables in any folder
+.env
+.env.local
+.env.*
+browser.json
