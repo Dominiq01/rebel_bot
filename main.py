@@ -62,7 +62,6 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 def send_telegram(text):
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     res = requests.post(url, json={"chat_id": CHAT_ID, "text": text, "parse_mode": "Markdown"})
-    print(res.text)
 
 
 def check_availability():
