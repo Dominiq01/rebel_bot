@@ -135,7 +135,7 @@ def send_telegram_screenshot(caption="Bot Screenshot"):
     with open(path, "rb") as photo:
         requests.post(url, data={"chat_id": CHAT_ID, "caption": caption}, files={"photo": photo})
 
-def wait_for_telegram_decision():
+def wait_for_telegram_decision(timeout_seconds=300):
     # 1. First, "Drain" old updates to ignore previous clicks
     print("🧹 Clearing old Telegram messages...")
     url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
@@ -148,7 +148,13 @@ def wait_for_telegram_decision():
         new_offset = None
 
     print("⏳ Waiting for FRESH Telegram approval...")
+    start_time = time.time()
     while True:
+        if time.time() - start_time > timeout_seconds:
+            print("⏰ Telegram wait timed out. Treating as a 'Cancel'.")
+            send_telegram(
+                "⏰ *Timeout:* No response received within 5 minutes. Cancelling order and resuming monitor...")
+            return False
         params = {"timeout": 30, "offset": new_offset}  # Use long polling (30s)
         try:
             response = requests.get(url, params=params).json()
