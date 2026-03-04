@@ -2,14 +2,12 @@ name: Rebel Restock Monitor (Continuous)
 
 on:
   schedule:
-    # Runs at minute 0 past hours 0, 5, 10, 15, and 20 UTC.
-    # The gap between 20:00 and 00:00 is 4 hours, which still safely avoids the 6-hour limit.
-    - cron: '0 0,5,10,15,20 * * *'
+    # Runs every 30 minutes (e.g., 00:00, 00:30, 01:00, 01:30...)
+    - cron: '*/30 * * * *'
   
-  # Allows you to start/restart the bot manually at any time
   workflow_dispatch: 
 
-# THIS IS THE MAGIC FIX for the overlap problem
+# Cancels the previous 30-minute run exactly as the new one starts
 concurrency:
   group: restock-monitor
   cancel-in-progress: true 
@@ -34,7 +32,6 @@ jobs:
 
       - name: Run Restock Bot
         env:
-          # Pulling sensitive data from GitHub Secrets
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           REBEL_ACCOUNT_PASS: ${{ secrets.REBEL_ACCOUNT_PASS }}
