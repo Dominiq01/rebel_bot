@@ -267,15 +267,30 @@ while True:
                 continue
 
         print("🚀 Proceeding to checkout...")
+
+        # Add a short wait here to ensure the item actually made it into the cart
+        time.sleep(3)
+
         driver.get(CHECKOUT_LINK)
+
+        # Check for the banner again just in case it popped up on the checkout page
+        handle_cookies(driver)
+
         try:
             payment_label = WebDriverWait(driver, WAIT_TIME).until(
                 EC.element_to_be_clickable((By.XPATH, "//*[@id='paymentMethodContent']/ul/li[3]/label"))
             )
             payment_label.click()
             fill_billing_address()
-        except:
-            print("❌ Could not find checkout elements. Is cart empty?")
+        except Exception as e:
+            # THIS IS THE FIX: Send the error to Telegram so you aren't blind!
+            print(f"❌ Checkout failed: {e}")
+            send_telegram_screenshot("🚨 Checkout Error - Look at this image to see what broke!")
+            send_telegram("❌ *Error:* Failed to click payment method or fill address. Check the console.")
+
+            # We clear the cart and sleep so it doesn't spam you 50 times a minute
+            driver.get(CLEAR_CART_LINK)
+            time.sleep(60)
             continue
 
         try:
